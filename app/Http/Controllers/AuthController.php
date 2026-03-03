@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Mail\VerifyEmail;
 use App\Models\User;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use function Laravel\Prompts\error;
 
 class AuthController extends Controller
 {
@@ -16,32 +22,55 @@ class AuthController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
+            'avatar' => 'nullable|image|max:10240',
         ]);
         if ($validator->fails()) {
-            return ApiResponse::error('Validation error!', 422, $validator->errors());
+            return ApiResponse::error(errors: $validator->errors());
         }
         $data = $validator->validated();
-        $user = User::create($data);
-        $token = $user->createToken('api-token')->plainTextToken;
-        return response()->json([
-            'user' => $user,
-            'token' => $token
-        ]);
+        $avatar = $request->avatar ?? null;
+        if ($avatar) {
+            $name = Str::uuid() . '.' . $avatar->guessExtension();
+            $avatar->move(public_path('avatars'), $name);
+            $data['avatar'] = 'avatars/' . $name;
+        }
+        $user = User::create($data)->refresh();
+
+        Mail::to($user->email)->send(new VerifyEmail($user));
+        return ApiResponse::success('Check your email to verify your account.', 201);
     }
     public function login(Request $request) {
         $validator = validator($request->all(), [
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'email' => 'required|email',
+            'password' => 'required|string',
         ]);
         if ($validator->fails()) {
-            return ApiResponse::error('Validation error!', 422, $validator->errors());
+            return ApiResponse::error(errors: $validator->errors());
         }
-        $data = $validator->validated();
-        $user = User::create($data);
-        $token = $user->createToken('api-token')->plainTextToken;
+        if (!auth()->attempt($request->only('email', 'password'))) {
+            return ApiResponse::error('Authentication failed', 401);
+        }
+
+        $token = auth()->user()->createToken('auth_token')->plainTextToken;
+
+
         return response()->json([
-            'user' => $user,
-            'token' => $token
-        ]);
+            'user' => auth()->user(),
+            'token' => $token,
+        ], 201);
+    }
+    public function logout(Request $request)
+    {
+        auth()->user()->currentAccessToken()->delete();
+
+        return response()->json(['message' => 'Logged out']);
+    }
+    public function verifyEmail(Request $request, User $user, $hash)
+    {
+        if (!hash_equals($hash, sha1($user->getEmailForVerification()))){
+            return ApiResponse::error('Access denied', 403);
+        }
+        $user->markEmailAsVerified();
+        return ApiResponse::success('Email verified successfully');
     }
 }

@@ -4,14 +4,26 @@ namespace App\Http\Responses;
 
 class ApiResponse
 {
-    public static function error(string $message, int $code, mixed $errors)
+    public static function error(string $message = 'Validation error', int $code = 422, mixed $errors = null)
     {
-        $data = [
+        $json = [
             'message' => $message
         ];
         if ($errors) {
-            $data['errors'] = $errors;
+            $json['errors'] = $errors;
         }
-        return response()->json($data, $code);
+        return response()->json($json, $code);
+    }
+    public static function success(string $message = null, int $code = 200, mixed $data = null)
+    {
+
+        $json = [];
+        if ($message) {
+            $json['message'] = $message;
+        }
+        if ($data) {
+            $json['data'] = $data;
+        }
+        return response()->json($json, $code);
     }
 }
