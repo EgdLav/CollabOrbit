@@ -29,15 +29,16 @@ class AuthController extends Controller
         }
         $data = $validator->validated();
         $avatar = $request->avatar ?? null;
-        if ($avatar) {
-            $name = Str::uuid() . '.' . $avatar->guessExtension();
-            $avatar->move(public_path('avatars'), $name);
-            $data['avatar'] = 'avatars/' . $name;
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
         $user = User::create($data)->refresh();
 
         Mail::to($user->email)->send(new VerifyEmail($user));
-        return ApiResponse::success('Check your email to verify your account.', 201);
+
+        return ApiResponse::success('Check your email to verify your account.', 201, [
+            'user' => new UserResource($user),
+        ]);
     }
     public function login(Request $request) {
         $validator = validator($request->all(), [
@@ -54,10 +55,9 @@ class AuthController extends Controller
         $token = auth()->user()->createToken('auth_token')->plainTextToken;
 
 
-        return response()->json([
-            'user' => auth()->user(),
+        return ApiResponse::success('Successfully logged in', 200, [
             'token' => $token,
-        ], 201);
+        ]);
     }
     public function logout(Request $request)
     {
