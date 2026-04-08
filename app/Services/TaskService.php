@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\TaskStatusChanged;
 use App\Http\Responses\ApiResponse;
 use App\Models\Task;
 use App\Models\User;
@@ -60,6 +61,7 @@ class TaskService
             return null;
         }
         $task->update($data);
+        event(new TaskStatusChanged($task));
         return $task->fresh();
     }
 }
