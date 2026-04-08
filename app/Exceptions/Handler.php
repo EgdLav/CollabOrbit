@@ -2,6 +2,10 @@
 
 namespace App\Exceptions;
 
+use App\Http\Responses\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -28,13 +32,16 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
-        $this->renderable(function (\Illuminate\Auth\AuthenticationException $e, $request) {
+        $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
+                return ApiResponse::error('Unauthenticated', 401);
             }
         });
+        $this->renderable(function (AuthorizationException $e, $request) {
+            return ApiResponse::error('Access denied', 403);
+        });
         $this->renderable(function (NotFoundHttpException $e, $request) {
-            return response()->json(['message' => 'Not found'], 404);
+            return ApiResponse::error('Not found', 404);
         });
     }
 }

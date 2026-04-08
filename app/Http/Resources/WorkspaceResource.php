@@ -15,13 +15,14 @@ class WorkspaceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $owner = User::find($this->owner_id);
         return [
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'owner' => new UserResource($owner),
-            'users' => UserResource::collection($this->users()->get()),
+            'owner_id' => new UserResource($this->owner),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'users' => UserResource::collection($this->users),
             'tasks' => TaskResource::collection($this->tasks),
         ];
     }

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
+use App\Jobs\SendVerifyEmail;
 use App\Mail\VerifyEmail;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,46 +18,22 @@ use function Laravel\Prompts\error;
 
 class AuthController extends Controller
 {
+    public function __construct(private AuthService $authService) {}
     //
-    public function register(Request $request) {
-        $validator = validator($request->all(), [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'avatar' => 'nullable|image|max:10240',
-        ]);
-        if ($validator->fails()) {
-            return ApiResponse::error(errors: $validator->errors());
-        }
-        $data = $validator->validated();
-        $avatar = $request->avatar ?? null;
-        if ($request->hasFile('avatar')) {
-            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
-        }
-        $user = User::create($data)->refresh();
-
-        Mail::to($user->email)->send(new VerifyEmail($user));
-
+    public function register(RegisterRequest $request) {
+        $user = $this->authService->register(
+            $request->validated(),
+            $request->file('avatar')
+        );
         return ApiResponse::success('Check your email to verify your account.', 201, [
             'user' => new UserResource($user),
         ]);
     }
     public function login(Request $request) {
-        $validator = validator($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-        if ($validator->fails()) {
-            return ApiResponse::error(errors: $validator->errors());
-        }
-        if (!auth()->attempt($request->only('email', 'password'))) {
+        $token = $this->authService->login($request->only('email', 'password'));
+        if (!$token) {
             return ApiResponse::error('Authentication failed', 401);
         }
-
-        $token = auth()->user()->createToken('auth_token')->plainTextToken;
-
-
         return ApiResponse::success('Successfully logged in', 200, [
             'token' => $token,
         ]);

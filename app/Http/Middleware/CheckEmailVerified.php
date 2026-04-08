@@ -16,6 +16,7 @@ class CheckEmailVerified
      */
     public function handle(Request $request, Closure $next): Response
     {
+
         if (!$request->user() || !$request->user()->hasVerifiedEmail()) {
             return ApiResponse::error('Email not verified', 403);
         }

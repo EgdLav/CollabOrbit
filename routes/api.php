@@ -38,9 +38,9 @@ Route::middleware(['auth:sanctum', 'verified.api'])->group(function () {
     Route::patch('/workspaces/{workspace}', [WorkspaceController::class, 'update']);
     Route::delete('/workspaces/{workspace}', [WorkspaceController::class, 'destroy']);
 
+    //task operations
     Route::post('/workspaces/{workspace}/tasks', [TaskController::class, 'store']);
     Route::patch('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'update'])->scopeBindings();
     Route::delete('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'destroy'])->scopeBindings();
-    Route::patch('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'changeStatus'])->scopeBindings();
+    Route::patch('/workspaces/{workspace}/tasks/{task}/status', [TaskController::class, 'changeStatus'])->scopeBindings();
 });
-

@@ -7,6 +7,7 @@ class ApiResponse
     public static function error(string $message = 'Validation error', int $code = 422, mixed $errors = null)
     {
         $json = [
+            'success' => false,
             'message' => $message
         ];
         if ($errors) {
@@ -17,7 +18,9 @@ class ApiResponse
     public static function success(string $message = null, int $code = 200, mixed $data = null)
     {
 
-        $json = [];
+        $json = [
+            'success' => true,
+        ];
         if ($message) {
             $json['message'] = $message;
         }

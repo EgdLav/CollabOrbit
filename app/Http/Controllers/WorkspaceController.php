@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\WorkspaceStoreRequest;
+use App\Http\Requests\WorkspaceUpdateRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Responses\ApiResponse;
 use App\Mail\VerifyEmail;
 use App\Models\User;
 use App\Models\Workspace;
-use http\Env\Response;
+use App\Services\WorkspaceService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class WorkspaceController extends Controller
 {
+
+    public function __construct(private WorkspaceService $workspaceService) {}
     /**
      * Display a listing of the resource.
      */
@@ -33,21 +38,12 @@ class WorkspaceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(WorkspaceStoreRequest $request)
     {
-        $validator = validator($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
-        ]);
-        if ($validator->fails()) {
-            return ApiResponse::error(errors: $validator->errors());
-        }
-        $data = $validator->validated();
-        $user = auth()->user();
-        $data['owner_id'] = $user->id;
-        $workspace = Workspace::create($data);
-        $workspace->users()->attach($user);
-
+        $workspace = $this->workspaceService->create(
+            $request->validated(),
+            auth()->user(),
+        );
         return ApiResponse::success('Workspace successfully created', 201, [
             'workspace' => new WorkspaceResource($workspace),
         ]);
@@ -72,24 +68,13 @@ class WorkspaceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Workspace $workspace)
+    public function update(WorkspaceUpdateRequest $request, Workspace $workspace)
     {
-        $validator = validator($request->all(), [
-            'name' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:255',
-        ]);
-        if ($validator->fails()) {
-            return ApiResponse::error(errors: $validator->errors());
-        }
-        $data = $validator->validated();
-        $user = auth()->user();
-        if ($user->id != $workspace->owner_id) {
-            return ApiResponse::error('Access denied', 403);
-        }
-
-        $filteredData = array_filter($data, fn($v) => $v != null);
-
-        $workspace->update($filteredData);
+        $workspace = $this->workspaceService->update(
+            $request->validated(),
+            $workspace,
+            auth()->user(),
+        );
 
         return ApiResponse::success('Workspace successfully updated', 200, [
             'workspace' => new WorkspaceResource($workspace),
@@ -101,11 +86,10 @@ class WorkspaceController extends Controller
      */
     public function destroy(Workspace $workspace)
     {
-        $user = auth()->user();
-        if ($user->id != $workspace->owner_id) {
+        if (Gate::denies('delete', $workspace)) {
             return ApiResponse::error('Access denied', 403);
         }
-        $workspace->delete();
+        $this->workspaceService->delete($workspace);
         return response()->noContent();
     }
 }
