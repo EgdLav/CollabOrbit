@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -15,18 +16,18 @@ class VerifyEmail extends Mailable
 {
     use Queueable, SerializesModels;
     public string $url;
-    public $user;
+    public User $user;
     /**
      * Create a new message instance.
      */
     public function __construct($user)
     {
         $this->user = $user;
-        $this->url = URL::temporarySignedRoute(
-            'verification.verify', // имя маршрута
-            Carbon::now()->addMinutes(60), // срок действия 60 минут
-            ['user' => $user, 'hash' => sha1($user->email)]
-        );
+        $this->url = config('app.frontend_url')
+            . '/verify-email?token='
+            . $user->email_token;
+
+        // TODO: make the confirm on frontend
     }
 
     /**

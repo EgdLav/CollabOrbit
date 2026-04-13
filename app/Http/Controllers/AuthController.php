@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
@@ -29,7 +30,7 @@ class AuthController extends Controller
             'user' => new UserResource($user),
         ]);
     }
-    public function login(Request $request) {
+    public function login(LoginRequest $request) {
         $token = $this->authService->login($request->only('email', 'password'));
         if (!$token) {
             return ApiResponse::error('Authentication failed', 401);

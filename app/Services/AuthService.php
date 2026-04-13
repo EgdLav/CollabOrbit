@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendVerifyEmail;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class AuthService
 {
@@ -13,7 +14,7 @@ class AuthService
         if ($avatar) {
             $data['avatar'] = $avatar->store('avatars', 'public');
         }
-
+        $data['email_token'] = Str::uuid();
         $user = User::create($data)->fresh();
 
         SendVerifyEmail::dispatch($user);

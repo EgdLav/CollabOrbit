@@ -23,11 +23,12 @@ use Illuminate\Support\Facades\Route;
 
 /// registration
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
 Route::get('/email/verify/{user}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 
 
+
 Route::middleware(['auth:sanctum', 'verified.api'])->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
 //   user's info
