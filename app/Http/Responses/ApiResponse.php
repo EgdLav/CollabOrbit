@@ -15,7 +15,7 @@ class ApiResponse
         }
         return response()->json($json, $code);
     }
-    public static function success(string $message = null, int $code = 200, mixed $data = null)
+    public static function success(string $message = 'Success', int $code = 200, mixed $data = null)
     {
 
         $json = [

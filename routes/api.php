@@ -23,16 +23,14 @@ use Illuminate\Support\Facades\Route;
 
 /// registration
 Route::post('/register', [AuthController::class, 'register']);
-Route::get('/email/verify/{user}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify');
-
-
+Route::get('/email/verify', [AuthController::class, 'verifyEmail'])->name('verification.verify');
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'verified.api'])->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
 //   user's info
-    Route::get('/me', [UserController::class, 'index']);
+    Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{user}', [UserController::class, 'show']);
 //   workspace operations
     Route::post('/workspaces', [WorkspaceController::class, 'store']);

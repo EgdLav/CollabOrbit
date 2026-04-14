@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Spatie\FlareClient\Api;
 use function Laravel\Prompts\error;
 
 class AuthController extends Controller
@@ -35,6 +36,9 @@ class AuthController extends Controller
         if (!$token) {
             return ApiResponse::error('Authentication failed', 401);
         }
+        if (!auth()->user()->hasVerifiedEmail()) {
+            return ApiResponse::error('Email not verified', 403);
+        }
         return ApiResponse::success('Successfully logged in', 200, [
             'token' => $token,
         ]);
@@ -45,12 +49,26 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Logged out']);
     }
-    public function verifyEmail(Request $request, User $user, $hash)
+    public function verifyEmail(Request $request)
     {
-        if (!hash_equals($hash, sha1($user->getEmailForVerification()))){
-            return ApiResponse::error('Access denied', 403);
+        if ($request->token === null) {
+            return ApiResponse::error('Invalid token', 400);
         }
-        $user->markEmailAsVerified();
-        return ApiResponse::success('Email verified successfully');
+        $user = User::where('email_token', $request->token)->first();
+
+        if (!$user) {
+            return ApiResponse::error('Invalid token', 400);
+        }
+
+        $user->email_verified_at = now();
+        $user->email_token = null;
+        $user->save();
+
+        return response()->json(['message' => 'Email verified']);
+//        if (!hash_equals($hash, sha1($user->getEmailForVerification()))){
+//            return ApiResponse::error('Access denied', 403);
+//        }
+//        $user->markEmailAsVerified();
+//        return ApiResponse::success('Email verified successfully');
     }
 }
