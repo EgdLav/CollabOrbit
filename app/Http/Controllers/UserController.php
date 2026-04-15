@@ -28,6 +28,7 @@ class UserController extends Controller
                 'per_page' => $users->perPage(),
                 'current_page' => $users->currentPage(),
                 'total' => $users->total(),
+                'last_page' => $users->lastPage(),
             ],
         ]);
     }

@@ -27,6 +27,7 @@ class RegisterRequest extends ApiFormRequest
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
             'avatar' => 'nullable|image|max:10240',
+            'department' => 'required|string|in:Backend Development,Frontend Development,Engineering,Mobile Development,DevOps,Quality Assurance,Data Engineering,Data Science,Product Management,UI/UX Design,Graphic Design,Research & Analytics,Marketing,Sales,Business Development,Human Resources,Finance,Legal,Operations,Public Relations,Copywriting'
         ];
     }
 }

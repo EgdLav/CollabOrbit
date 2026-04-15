@@ -26,7 +26,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/email/verify', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware(['auth:sanctum', 'verified.api'])->group(function () {
+Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
 //   user's info

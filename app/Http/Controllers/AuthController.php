@@ -36,9 +36,9 @@ class AuthController extends Controller
         if (!$token) {
             return ApiResponse::error('Authentication failed', 401);
         }
-        if (!auth()->user()->hasVerifiedEmail()) {
-            return ApiResponse::error('Email not verified', 403);
-        }
+//        if (!auth()->user()->hasVerifiedEmail()) {
+//            return ApiResponse::error('Email not verified', 403);
+//        } TODO
         return ApiResponse::success('Successfully logged in', 200, [
             'token' => $token,
         ]);
