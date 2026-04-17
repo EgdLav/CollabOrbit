@@ -22,8 +22,9 @@ class WorkspaceStoreRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:255',
+            'slug' => 'required|string|max:50|unique:workspaces,slug|regex:/^[a-z0-9-]+$/',
         ];
     }
 }

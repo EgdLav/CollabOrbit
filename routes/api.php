@@ -33,8 +33,10 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{user}', [UserController::class, 'show']);
 //   workspace operations
+    Route::get('/workspaces', [WorkspaceController::class, 'index']);
     Route::post('/workspaces', [WorkspaceController::class, 'store']);
     Route::patch('/workspaces/{workspace}', [WorkspaceController::class, 'update']);
+    Route::get('/workspaces/{workspace}', [WorkspaceController::class, 'show']);
     Route::delete('/workspaces/{workspace}', [WorkspaceController::class, 'destroy']);
 
     //task operations

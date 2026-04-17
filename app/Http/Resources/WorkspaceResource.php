@@ -19,10 +19,12 @@ class WorkspaceResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'owner_id' => new UserResource($this->owner),
+            'slug' => $this->slug,
+            'owner' => new UserResource($this->owner),
+            'is_owner' => $request->user()?->id === $this->owner_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'users' => UserResource::collection($this->users),
+            'members' => UserResource::collection($this->users),
             'tasks' => TaskResource::collection($this->tasks),
         ];
     }

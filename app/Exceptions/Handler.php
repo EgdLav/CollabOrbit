@@ -7,8 +7,10 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Auth\Access\Authorizable;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -29,19 +31,31 @@ class Handler extends ExceptionHandler
      */
     public function register(): void
     {
+
+        $this->renderable(function (AccessDeniedHttpException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
+        });
         $this->reportable(function (Throwable $e) {
             //
         });
         $this->renderable(function (AuthenticationException $e, $request) {
-            if ($request->is('api/*')) {
-                return ApiResponse::error('Unauthenticated', 401);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
             }
         });
+
         $this->renderable(function (AuthorizationException $e, $request) {
-            return ApiResponse::error('Access denied', 403);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
         });
+
         $this->renderable(function (NotFoundHttpException $e, $request) {
-            return ApiResponse::error('Not found', 404);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Not found'], 404);
+            }
         });
     }
 }

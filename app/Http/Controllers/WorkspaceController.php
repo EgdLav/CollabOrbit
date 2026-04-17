@@ -22,9 +22,14 @@ class WorkspaceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $workspaces = auth()->user()->workspaces();
+        if ($n = $request->search) {
+            $workspaces = $workspaces->where('name', 'like', "%$n%")->orWhere('description', 'like', "%$n%")->orWhere('slug', 'like', "%$n%");
+        }
+        $workspaces = $workspaces->get();
+        return ApiResponse::success(data: WorkspaceResource::collection($workspaces));
     }
 
     /**
@@ -52,9 +57,10 @@ class WorkspaceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Workspace $workspace)
+    public function show(Request $request, Workspace $workspace)
     {
-        //
+        $this->authorize('view', $workspace);
+        return ApiResponse::success(data: new WorkspaceResource($workspace));
     }
 
     /**
