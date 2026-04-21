@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -14,170 +16,147 @@ class TaskTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_create_task(): void
+    public function test_task_create_returns_403_if_executor_is_not_workspace_member(): void
     {
         Storage::fake('public');
 
-        $owner = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-
-        $executor = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
+        $owner = User::factory()->create();
+        $executor = User::factory()->create();
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
+            'slug' => 'tasks-workspace',
         ]);
+        $workspace->users()->attach($owner->id);
 
-        $workspace->users()->attach($executor);
+        $category = Category::query()->create([
+            'workspace_id' => $workspace->id,
+            'name' => 'General',
+        ]);
 
         $this->actingAs($owner, 'sanctum');
 
-        $response = $this->post("/api/workspaces/{$workspace->id}/tasks", [
+        $response = $this->postJson("/api/workspaces/{$workspace->id}/tasks", [
             'name' => 'My Task',
             'description' => 'Task description',
             'executor_id' => $executor->id,
+            'category_id' => $category->id,
             'preview' => UploadedFile::fake()->image('preview.png'),
             'files' => [
                 UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
             ],
         ]);
 
-        $response->assertStatus(201)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => [
-                    'task' => [
-                        'id',
-                        'name',
-                        'description',
-                        'preview',
-                        'files',
-                        'status',
-                        'workspace_id',
-                        'executor_id',
-                    ],
-                ],
-            ]);
-
-        $this->assertDatabaseHas('tasks', [
-            'name' => 'My Task',
-            'workspace_id' => $workspace->id,
-            'executor_id' => $executor->id,
-        ]);
+        $response->assertStatus(403);
     }
 
-    public function test_user_can_update_task(): void
+    public function test_task_create_requires_category_id(): void
     {
-        $owner = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-
-        $executor = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
+        $owner = User::factory()->create();
+        $executor = User::factory()->create();
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
+            'slug' => 'tasks-validation-workspace',
         ]);
-
-        $workspace->users()->attach($executor);
-
-        $task = Task::factory()->create([
-            'workspace_id' => $workspace->id,
-            'executor_id' => $executor->id,
-            'preview' => 'previews/original.png',
-            'files' => [],
-        ]);
+        $workspace->users()->attach([$owner->id, $executor->id]);
 
         $this->actingAs($owner, 'sanctum');
 
+        $response = $this->postJson("/api/workspaces/{$workspace->id}/tasks", [
+            'name' => 'Task without category',
+            'executor_id' => $executor->id,
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_task_creator_can_update_task(): void
+    {
+        $owner = User::factory()->create();
+        $executor = User::factory()->create();
+
+        $workspace = Workspace::factory()->create([
+            'owner_id' => $owner->id,
+            'slug' => 'update-task-workspace',
+        ]);
+        $workspace->users()->attach([$owner->id, $executor->id]);
+        $category = Category::query()->create([
+            'workspace_id' => $workspace->id,
+            'name' => 'Updates',
+        ]);
+
+        $task = $this->insertTask([
+            'workspace_id' => $workspace->id,
+            'category_id' => $category->id,
+            'creator_id' => $owner->id,
+            'executor_id' => $executor->id,
+            'name' => 'Initial task',
+        ]);
+
+        $this->actingAs($owner, 'sanctum');
         $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}", [
-            'name' => 'Updated Task',
+            'name' => 'Updated task',
             'description' => 'Updated description',
         ]);
 
         $response->assertStatus(200)
             ->assertJsonFragment([
-                'name' => 'Updated Task',
-                'description' => 'Updated description',
+                'name' => 'Updated task',
             ]);
-
         $this->assertDatabaseHas('tasks', [
             'id' => $task->id,
-            'name' => 'Updated Task',
+            'name' => 'Updated task',
         ]);
     }
 
-    public function test_owner_can_complete_task(): void
+    public function test_random_member_cannot_update_task(): void
     {
-        $owner = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-
-        $executor = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
+        $owner = User::factory()->create();
+        $executor = User::factory()->create();
+        $member = User::factory()->create();
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
+            'slug' => 'forbidden-task-workspace',
         ]);
-
-        $workspace->users()->attach($executor);
-
-        $task = Task::factory()->create([
+        $workspace->users()->attach([$owner->id, $executor->id, $member->id]);
+        $category = Category::query()->create([
             'workspace_id' => $workspace->id,
-            'executor_id' => $executor->id,
-            'status' => 'new',
+            'name' => 'Security',
         ]);
 
-        $this->actingAs($owner, 'sanctum');
-
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}/status", [
-            'status' => 'completed',
-        ]);
-
-        $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
-            'status' => 'completed',
-        ]);
-        $response->assertStatus(200)
-            ->assertJsonFragment([
-                'status' => 'completed',
-            ]);
-
-    }
-
-    public function test_executor_cannot_complete_task(): void
-    {
-        $owner = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-
-        $executor = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-
-        $workspace = Workspace::factory()->create([
-            'owner_id' => $owner->id,
-        ]);
-
-        $workspace->users()->attach($executor);
-
-        $task = Task::factory()->create([
+        $task = $this->insertTask([
             'workspace_id' => $workspace->id,
+            'category_id' => $category->id,
+            'creator_id' => $owner->id,
             'executor_id' => $executor->id,
-            'status' => 'new',
+            'name' => 'Protected task',
         ]);
 
-        $this->actingAs($executor, 'sanctum');
-
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}/status", [
-            'status' => 'completed',
+        $this->actingAs($member, 'sanctum');
+        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}", [
+            'name' => 'Member update attempt',
         ]);
         $response->assertStatus(403);
+    }
 
+    private function insertTask(array $data): Task
+    {
+        DB::table('tasks')->insert([
+            'name' => $data['name'] ?? 'Task',
+            'description' => 'Task description',
+            'preview' => 'previews/default.png',
+            'files' => json_encode([]),
+            'workspace_id' => $data['workspace_id'],
+            'category_id' => $data['category_id'],
+            'creator_id' => $data['creator_id'],
+            'executor_id' => $data['executor_id'],
+            'due_date' => now()->addDay()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return Task::query()->latest('id')->firstOrFail();
     }
 }

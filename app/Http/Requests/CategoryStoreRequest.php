@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class WorkspaceUpdateRequest extends FormRequest
+class CategoryStoreRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -12,7 +12,7 @@ class WorkspaceUpdateRequest extends FormRequest
     public function authorize(): bool
     {
         $workspace = $this->route('workspace');
-        return $workspace && $this->user()->can('update', $workspace);
+        return $workspace && $this->user()->can('createCategory', $workspace);
     }
 
     /**
@@ -23,9 +23,7 @@ class WorkspaceUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
-            'description' => 'nullable|string|max:255',
-            'slug' => 'required|string|max:50|unique:workspaces,slug|regex:/^[a-z0-9-]+$/'
+            'name' => 'required|string|max:100',
         ];
     }
 }

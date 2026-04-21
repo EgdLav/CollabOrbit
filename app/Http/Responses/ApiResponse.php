@@ -2,9 +2,11 @@
 
 namespace App\Http\Responses;
 
+use Illuminate\Http\JsonResponse;
+
 class ApiResponse
 {
-    public static function error(string $message = 'Validation error', int $code = 422, mixed $errors = null)
+    public static function error(string $message = 'Validation error', int $code = 422, mixed $errors = null): JsonResponse
     {
         $json = [
             'success' => false,
@@ -15,7 +17,7 @@ class ApiResponse
         }
         return response()->json($json, $code);
     }
-    public static function success(string $message = 'Success', int $code = 200, mixed $data = null)
+    public static function success(string $message = 'Success', int $code = 200, mixed $data = null): JsonResponse
     {
 
         $json = [

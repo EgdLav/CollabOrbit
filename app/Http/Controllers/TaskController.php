@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TaskChangeCategoryRequest;
 use App\Http\Requests\TaskChangeStatusRequest;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
@@ -76,12 +77,9 @@ class TaskController extends Controller
             'task' => new TaskResource($task),
         ]);
     }
-    public function changeStatus(TaskChangeStatusRequest $request, Workspace $workspace, Task $task)
+    public function changeCategory(TaskChangeCategoryRequest $request, Workspace $workspace, Task $task)
     {
-        $task = $this->taskService->changeStatus($task, $workspace, $request->validated());
-        if (!$task) {
-            return ApiResponse::error('Access denied', 403);
-        }
+        $task = $this->taskService->changeCategory($task, $workspace, $request->validated());
         return ApiResponse::success('Task successfully updated', 200, [
             'task' => new TaskResource($task),
         ]);

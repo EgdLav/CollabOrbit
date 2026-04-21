@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
+use App\Models\Category;
 use App\Models\Task;
 use App\Models\Workspace;
+use App\Policies\CategoryPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\WorkspacePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;

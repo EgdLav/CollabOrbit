@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Task extends Model
@@ -15,15 +16,20 @@ class Task extends Model
     {
         return $this->belongsTo(Workspace::class);
     }
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     protected $fillable = [
         'name',
         'description',
-        'status',
         'preview',
         'files',
         'workspace_id',
+        'category_id',
         'executor_id',
+        'creator_id',
     ];
     protected $casts = [
         'files' => 'array',

@@ -14,7 +14,8 @@ class TaskUpdateRequest extends ApiFormRequest
     public function authorize(): bool
     {
         $workspace = $this->route('workspace');
-        return $this->user()->can('updateTask', $workspace);
+        $task = $this->route('task');
+        return $workspace && $task && $this->user()->can('updateTask', [$workspace, $task]);
     }
 
     /**

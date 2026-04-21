@@ -25,9 +25,9 @@ class TaskPolicy
     {
         //
     }
-    public function changeStatus(User $user, Task $task): bool
+    public function changeCategory(User $user, Task $task): bool
     {
-        return $user->id == $task->workspace->owner_id || $user->id == $task->executor_id;
+        return $user->id == $task->executor_id || $user->id == $task->creator_id;
     }
 
     /**

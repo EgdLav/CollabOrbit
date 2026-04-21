@@ -23,6 +23,10 @@ class Workspace extends Model
     {
         return $this->hasMany(Task::class);
     }
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class);
+    }
 
     protected static function booted()
     {

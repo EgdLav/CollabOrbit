@@ -3,17 +3,17 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class TaskChangeStatusRequest extends ApiFormRequest
+class TaskChangeCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $workspace = $this->route('workspace');
         $task = $this->route('task');
-        return $workspace && $task && $this->user()->can('changeStatus', $workspace, $task);
+        return $task && $this->user()->can('changeCategory', $task);
     }
 
     /**
@@ -23,8 +23,16 @@ class TaskChangeStatusRequest extends ApiFormRequest
      */
     public function rules(): array
     {
+        $workspace = $this->route('workspace');
+
         return [
-            'category' => 'required|string|in:new,in progress,on edge,completed',
+            'category_id' => [
+                'required',
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($q) use ($workspace) {
+                    $q->where('workspace_id', $workspace->id);
+                }),
+            ],
         ];
     }
 }

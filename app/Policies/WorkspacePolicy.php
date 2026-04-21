@@ -32,15 +32,28 @@ class WorkspacePolicy
 
     public function createTask(User $user, Workspace $workspace): bool
     {
-        return $user->id === $workspace->owner_id;
+        return $workspace->users()->where('user_id', $user->id)->exists();
     }
-    public function updateTask(User $user, Workspace $workspace): bool
+    public function updateTask(User $user, Workspace $workspace, Task $task): bool
     {
-        return $user->id === $workspace->owner_id;
+        return $user->id == $task->creator_id || $user->id == $workspace->owner_id;
     }
-    public function changeStatus(User $user, Workspace $workspace, Task $task): bool
+    public function changeCategory(User $user, Workspace $workspace, Task $task): bool
     {
-        return $user->id == $workspace->owner_id || $user->id == $task->executor_id;
+        return $user->id == $workspace->owner_id || $user->id == $task->executor_id || $user->id == $task->creator_id;
+    }
+
+    public function createCategory(User $user, Workspace $workspace): bool
+    {
+        return $user->id == $workspace->owner_id;
+    }
+    public function updateCategory(User $user, Workspace $workspace): bool
+    {
+        return $user->id == $workspace->owner_id;
+    }
+    public function deleteCategory(User $user, Workspace $workspace): bool
+    {
+        return $user->id == $workspace->owner_id;
     }
 
 

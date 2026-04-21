@@ -60,7 +60,9 @@ class WorkspaceController extends Controller
     public function show(Request $request, Workspace $workspace)
     {
         $this->authorize('view', $workspace);
-        return ApiResponse::success(data: new WorkspaceResource($workspace));
+        return ApiResponse::success(data: [
+            'workspace' => new WorkspaceResource($workspace),
+        ]);
     }
 
     /**
@@ -96,6 +98,6 @@ class WorkspaceController extends Controller
             return ApiResponse::error('Access denied', 403);
         }
         $this->workspaceService->delete($workspace);
-        return response()->noContent();
+        return ApiResponse::success();
     }
 }

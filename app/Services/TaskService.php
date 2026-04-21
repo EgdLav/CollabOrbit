@@ -32,6 +32,7 @@ class TaskService
 
         $data['files'] = $paths;
         $data['workspace_id'] = $workspace->id;
+        $data['creator_id'] = $request->user()->id;
         $task = Task::create($data)->fresh();
         return $task;
     }
@@ -56,12 +57,8 @@ class TaskService
         $task->update($filteredData);
         return $task->fresh();
     }
-    public function changeStatus(Task $task, Workspace $workspace, array $data): ?Task {
-        if ($data['status'] == 'completed' && auth()->id() != $workspace->owner_id) {
-            return null;
-        }
+    public function changeCategory(Task $task, Workspace $workspace, array $data): ?Task {
         $task->update($data);
-        event(new TaskStatusChanged($task));
         return $task->fresh();
     }
 }

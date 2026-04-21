@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
@@ -38,10 +39,14 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::patch('/workspaces/{workspace}', [WorkspaceController::class, 'update']);
     Route::get('/workspaces/{workspace}', [WorkspaceController::class, 'show']);
     Route::delete('/workspaces/{workspace}', [WorkspaceController::class, 'destroy']);
+//   workspace's categories operations
+    Route::post('/workspaces/{workspace}/categories', [CategoryController::class, 'store']);
+    Route::patch('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'update'])->scopeBindings();
+    Route::delete('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'destroy'])->scopeBindings();
 
     //task operations
     Route::post('/workspaces/{workspace}/tasks', [TaskController::class, 'store']);
     Route::patch('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'update'])->scopeBindings();
     Route::delete('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'destroy'])->scopeBindings();
-    Route::patch('/workspaces/{workspace}/tasks/{task}/status', [TaskController::class, 'changeStatus'])->scopeBindings();
+    Route::patch('/workspaces/{workspace}/tasks/{task}/category', [TaskController::class, 'changeCategory'])->scopeBindings();
 });

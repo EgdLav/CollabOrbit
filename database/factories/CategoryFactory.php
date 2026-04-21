@@ -2,13 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Workspace>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
  */
-class WorkspaceFactory extends Factory
+class CategoryFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,9 +18,6 @@ class WorkspaceFactory extends Factory
     {
         return [
             'name' => fake()->word(),
-            'description' => fake()->sentence(),
-            'slug' => fake()->sentence(),
-            'owner_id' => User::factory(),
         ];
     }
 }
