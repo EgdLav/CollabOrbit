@@ -25,7 +25,7 @@ class WorkspaceResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'members' => UserResource::collection($this->users),
-            'tasks' => TaskResource::collection($this->tasks),
+            'categories' => CategoryResource::collection($this->categories),
         ];
     }
 }

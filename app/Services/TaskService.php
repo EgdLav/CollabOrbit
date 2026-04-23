@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Events\TaskStatusChanged;
 use App\Http\Responses\ApiResponse;
+use App\Models\Category;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 
 class TaskService
 {
-    public function create(Request $request, Workspace $workspace, array $data): ?Task {
+    public function create(Request $request, Workspace $workspace, Category $category, array $data): ?Task {
         if (!$workspace->users()->where('users.id', $data['executor_id'])->exists()) {
             return null;
         }
@@ -33,6 +34,7 @@ class TaskService
         $data['files'] = $paths;
         $data['workspace_id'] = $workspace->id;
         $data['creator_id'] = $request->user()->id;
+        $data['category_id'] = $category->id;
         $task = Task::create($data)->fresh();
         return $task;
     }

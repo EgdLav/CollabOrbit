@@ -20,6 +20,14 @@ class Task extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    public function executor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'executor_id');
+    }
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
 
     protected $fillable = [
         'name',
@@ -30,6 +38,7 @@ class Task extends Model
         'category_id',
         'executor_id',
         'creator_id',
+        'due_date',
     ];
     protected $casts = [
         'files' => 'array',

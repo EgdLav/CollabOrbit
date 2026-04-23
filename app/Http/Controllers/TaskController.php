@@ -9,6 +9,7 @@ use App\Http\Requests\TaskUpdateRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\Category;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
@@ -38,9 +39,9 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(TaskStoreRequest $request, Workspace $workspace)
+    public function store(TaskStoreRequest $request, Workspace $workspace, Category $category)
     {
-        $task = $this->taskService->create($request, $workspace, $request->validated());
+        $task = $this->taskService->create($request, $workspace, $category, $request->validated());
 
         if (!$task) {
             return ApiResponse::error('Executor must be in workspace', 403);
@@ -69,15 +70,15 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(TaskUpdateRequest $request, Workspace $workspace, Task $task)
+    public function update(TaskUpdateRequest $request, Workspace $workspace, Category $category, Task $task)
     {
-        $task = $this->taskService->update($request, $task, $request->validated());
+        $task = $this->taskService->update($request, $category, $task, $request->validated());
 
         return ApiResponse::success('Task successfully updated', 200, [
             'task' => new TaskResource($task),
         ]);
     }
-    public function changeCategory(TaskChangeCategoryRequest $request, Workspace $workspace, Task $task)
+    public function changeCategory(TaskChangeCategoryRequest $request, Workspace $workspace, Category $category, Task $task)
     {
         $task = $this->taskService->changeCategory($task, $workspace, $request->validated());
         return ApiResponse::success('Task successfully updated', 200, [

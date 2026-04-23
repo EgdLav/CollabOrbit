@@ -19,6 +19,7 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'workspace_id' => $this->workspace_id,
+            'tasks' => TaskResource::collection($this->tasks),
         ];
     }
 }

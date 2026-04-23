@@ -34,6 +34,13 @@ class Workspace extends Model
             $ws->tasks->each->delete();
             $ws->users()->detach();
         });
+        static::created(function ($workspace) {
+            $workspace->categories()->createMany([
+                ['name' => 'To Do'],
+                ['name' => 'In Progress'],
+                ['name' => 'Done'],
+            ]);
+        });
     }
 
     protected $fillable = [

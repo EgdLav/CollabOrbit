@@ -37,4 +37,9 @@ class UserController extends Controller
             'user' => new UserResource($user),
         ]);
     }
+    public function me(Request $request) {
+        return ApiResponse::success(data:[
+            'user' => new UserResource($request->user()),
+        ]);
+    }
 }

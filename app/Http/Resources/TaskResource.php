@@ -21,8 +21,10 @@ class TaskResource extends JsonResource
             'preview' => $this->preview_url,
             'files' => $this->files_urls,
             'status' => $this->status,
+            'due_date' => $this->due_date,
             'workspace_id' => $this->workspace_id,
-            'executor_id' => $this->executor_id,
+            'creator' => new UserResource($this->creator),
+            'executor' => new UserResource($this->executor),
         ];
     }
 }

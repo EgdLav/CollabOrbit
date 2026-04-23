@@ -32,7 +32,7 @@ class TaskStoreRequest extends ApiFormRequest
             'files' => 'nullable|array|max:1000',
             'files.*' => 'file|max:10240',
             'executor_id' => 'required|integer|exists:users,id',
-            'category_id' => 'required|integer|exists:categories,id',
+            'due_date' => 'required|date|after_or_equal:today',
         ];
     }
 }

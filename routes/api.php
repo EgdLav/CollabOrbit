@@ -33,20 +33,22 @@ Route::middleware(['auth:sanctum', ])->group(function () {
 //   user's info
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::get('/me', [UserController::class, 'me']);
 //   workspace operations
     Route::get('/workspaces', [WorkspaceController::class, 'index']);
     Route::post('/workspaces', [WorkspaceController::class, 'store']);
     Route::patch('/workspaces/{workspace}', [WorkspaceController::class, 'update']);
     Route::get('/workspaces/{workspace}', [WorkspaceController::class, 'show']);
     Route::delete('/workspaces/{workspace}', [WorkspaceController::class, 'destroy']);
-//   workspace's categories operations
+//   workspace categories operations
     Route::post('/workspaces/{workspace}/categories', [CategoryController::class, 'store']);
     Route::patch('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'update'])->scopeBindings();
     Route::delete('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'destroy'])->scopeBindings();
+    Route::get('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'show'])->scopeBindings();;
 
     //task operations
-    Route::post('/workspaces/{workspace}/tasks', [TaskController::class, 'store']);
-    Route::patch('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'update'])->scopeBindings();
-    Route::delete('/workspaces/{workspace}/tasks/{task}', [TaskController::class, 'destroy'])->scopeBindings();
-    Route::patch('/workspaces/{workspace}/tasks/{task}/category', [TaskController::class, 'changeCategory'])->scopeBindings();
+    Route::post('/workspaces/{workspace}/categories/{category}/tasks', [TaskController::class, 'store']);
+    Route::patch('/workspaces/{workspace}/categories/{category}/tasks/{task}', [TaskController::class, 'update'])->scopeBindings();
+    Route::delete('/workspaces/{workspace}/categories/{category}/tasks/{task}', [TaskController::class, 'destroy'])->scopeBindings();
+    Route::patch('/workspaces/{workspace}/categories/{category}/tasks/{task}/category', [TaskController::class, 'changeCategory'])->scopeBindings();
 });

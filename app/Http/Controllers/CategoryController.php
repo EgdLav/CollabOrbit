@@ -49,9 +49,12 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Category $category)
+    public function show(Workspace $workspace, Category $category)
     {
-        //
+        $this->authorize('view', $workspace);
+        return ApiResponse::success(data: [
+            'category' => new CategoryResource($category),
+        ]);
     }
 
     /**
