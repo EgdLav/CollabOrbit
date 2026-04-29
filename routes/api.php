@@ -2,13 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
-use App\Http\Resources\UserResource;
-use App\Http\Responses\ApiResponse;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,7 +41,9 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::post('/workspaces/{workspace}/categories', [CategoryController::class, 'store']);
     Route::patch('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'update'])->scopeBindings();
     Route::delete('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'destroy'])->scopeBindings();
-    Route::get('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'show'])->scopeBindings();;
+    Route::get('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'show'])->scopeBindings();
+    // invite to workspace
+    Route::post('/workspaces/{workspace}/{email/', [InvitationController::class, 'store'])->scopeBindings();
 
     //task operations
     Route::post('/workspaces/{workspace}/categories/{category}/tasks', [TaskController::class, 'store']);

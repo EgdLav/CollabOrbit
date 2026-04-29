@@ -4,19 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Http\Resources\UserResource;
+use App\Http\Resources\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
-use App\Jobs\SendVerifyEmail;
-use App\Mail\VerifyEmail;
 use App\Models\User;
 use App\Services\AuthService;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Spatie\FlareClient\Api;
-use function Laravel\Prompts\error;
 
 class AuthController extends Controller
 {
@@ -41,6 +33,7 @@ class AuthController extends Controller
 //        } TODO
         return ApiResponse::success('Successfully logged in', 200, [
             'token' => $token,
+            'user' => new UserResource(auth()->user()),
         ]);
     }
     public function logout(Request $request)

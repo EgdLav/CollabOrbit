@@ -4,16 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\WorkspaceStoreRequest;
 use App\Http\Requests\WorkspaceUpdateRequest;
-use App\Http\Resources\WorkspaceResource;
+use App\Http\Resources\Resources\WorkspaceResource;
 use App\Http\Responses\ApiResponse;
-use App\Mail\VerifyEmail;
-use App\Models\User;
 use App\Models\Workspace;
 use App\Services\WorkspaceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
 
 class WorkspaceController extends Controller
 {

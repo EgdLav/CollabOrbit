@@ -32,6 +32,7 @@ class Workspace extends Model
     {
         static::deleting(function ($ws) {
             $ws->tasks->each->delete();
+            $ws->categories->each->delete();
             $ws->users()->detach();
         });
         static::created(function ($workspace) {

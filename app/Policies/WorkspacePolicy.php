@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Http\Responses\ApiResponse;
+use App\Models\Invitation;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
@@ -54,6 +55,15 @@ class WorkspacePolicy
     public function deleteCategory(User $user, Workspace $workspace): bool
     {
         return $user->id == $workspace->owner_id;
+    }
+    public function createInvitation(User $user, Workspace $workspace): bool
+    {
+        return $workspace->owner_id == $user->id;
+    }
+
+    public function updateInvitation(User $user, Invitation $invitation)
+    {
+        return $user->id === $invitation->invitee_id;
     }
 
 

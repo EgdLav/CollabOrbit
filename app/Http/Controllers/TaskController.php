@@ -6,16 +6,12 @@ use App\Http\Requests\TaskChangeCategoryRequest;
 use App\Http\Requests\TaskChangeStatusRequest;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
-use App\Http\Resources\TaskResource;
-use App\Http\Resources\WorkspaceResource;
+use App\Http\Resources\Resources\TaskResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Models\Task;
-use App\Models\User;
 use App\Models\Workspace;
 use App\Services\TaskService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
@@ -81,7 +77,7 @@ class TaskController extends Controller
     public function changeCategory(TaskChangeCategoryRequest $request, Workspace $workspace, Category $category, Task $task)
     {
         $task = $this->taskService->changeCategory($task, $workspace, $request->validated());
-        return ApiResponse::success('Task successfully updated', 200, [
+        return ApiResponse::success('Task moved', 200, [
             'task' => new TaskResource($task),
         ]);
     }

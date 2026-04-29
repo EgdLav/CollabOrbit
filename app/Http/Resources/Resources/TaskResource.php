@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -20,7 +20,6 @@ class TaskResource extends JsonResource
             'description' => $this->description,
             'preview' => $this->preview_url,
             'files' => $this->files_urls,
-            'status' => $this->status,
             'due_date' => $this->due_date,
             'workspace_id' => $this->workspace_id,
             'creator' => new UserResource($this->creator),

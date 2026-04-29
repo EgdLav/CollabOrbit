@@ -24,7 +24,6 @@ class TaskChangeCategoryRequest extends FormRequest
     public function rules(): array
     {
         $workspace = $this->route('workspace');
-
         return [
             'category_id' => [
                 'required',

@@ -4,14 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
-use App\Http\Resources\CategoryResource;
-use App\Http\Resources\WorkspaceResource;
+use App\Http\Resources\Resources\CategoryResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Models\Workspace;
 use App\Services\CategoryService;
-use App\Services\WorkspaceService;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
