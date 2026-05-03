@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InvitationStoreRequest;
+use App\Http\Requests\InvitationUpdateRequest;
+use App\Http\Resources\InvitationResource;
+use App\Http\Responses\ApiResponse;
 use App\Models\Invitation;
 use App\Models\Workspace;
+use App\Services\InvitationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class InvitationController extends Controller
 {
+    public function __construct(private InvitationService $invitationService) {}
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $invites = $request->user()->invitations;
+        return ApiResponse::success(data:[
+            'invites' => InvitationResource::collection($invites),
+        ]);
     }
 
     /**
@@ -28,30 +36,22 @@ class InvitationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Workspace $workspace, $email)
+    public function store(InvitationStoreRequest $request, Workspace $workspace)
     {
-        $email = $request->input('email');
+        $invitee_id = $request->input('invitee_id');
 
-        if ($workspace->users()->where('email', $email)->exists()) {
-            return response()->json(['message' => 'Already in workspace'], 409);
-        }
-        if (Invitation::where('workspace_id', $workspace->id)
-            ->where('email', $email)
-            ->exists()) {
-            return response()->json(['message' => 'Already invited'], 409);
+        if ($workspace->users()->where('users.id', $invitee_id)->exists()) {
+            return ApiResponse::error('Already in workspace', 409);
         }
 
-        $invitation = Invitation::create([
-            'workspace_id' => $workspace->id,
-            'creator_id' => $request->user()->id,
-            'email' => $email,
-            'token' => Str::uuid(),
-            'expires_at' => now()->addDays(7),
+        if ($workspace->invitations()->where('invitee_id', $invitee_id)->exists()) {
+            return ApiResponse::error('Already invited', 409);
+        }
+
+        $invitation = $this->invitationService->create($workspace, $invitee_id);
+        return ApiResponse::success('Invitation successfully created', 201, [
+            'invitation' => new InvitationResource($invitation),
         ]);
-
-        $link = "http://localhost:5173/invite/{$invitation->token}";
-
-        return response()->json(['link' => $link]);
     }
 
     /**
@@ -73,9 +73,12 @@ class InvitationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Invitation $invitation)
+    public function update(InvitationUpdateRequest $request, Workspace $workspace, Invitation $invitation)
     {
-        //
+        $status = $request->input('status');
+
+        $this->invitationService->update($request->user(), $workspace, $invitation, $status);
+        return ApiResponse::success("Invitation {$status}", 200);
     }
 
     /**

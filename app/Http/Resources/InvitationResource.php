@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Resources;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryResource extends JsonResource
+class InvitationResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,10 +15,8 @@ class CategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'workspace_id' => $this->workspace_id,
-            'tasks' => TaskResource::collection($this->tasks),
+            'workspace' => new WorkspaceResource($this->workspace),
+            'invitee' => new UserResource($this->invitee),
         ];
     }
 }

@@ -6,7 +6,7 @@ use App\Http\Requests\TaskChangeCategoryRequest;
 use App\Http\Requests\TaskChangeStatusRequest;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
-use App\Http\Resources\Resources\TaskResource;
+use App\Http\Resources\TaskResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Models\Task;
@@ -68,7 +68,7 @@ class TaskController extends Controller
      */
     public function update(TaskUpdateRequest $request, Workspace $workspace, Category $category, Task $task)
     {
-        $task = $this->taskService->update($request, $category, $task, $request->validated());
+        $task = $this->taskService->update($request, $task, $request->validated());
 
         return ApiResponse::success('Task successfully updated', 200, [
             'task' => new TaskResource($task),

@@ -17,6 +17,10 @@ class Invitation extends Model
 
     public function workspace(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'creator_id');
+        return $this->belongsTo(Workspace::class, 'workspace_id');
+    }
+    public function invitee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invitee_id');
     }
 }

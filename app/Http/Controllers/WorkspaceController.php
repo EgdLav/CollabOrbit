@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\WorkspaceStoreRequest;
 use App\Http\Requests\WorkspaceUpdateRequest;
-use App\Http\Resources\Resources\WorkspaceResource;
+use App\Http\Resources\WorkspaceResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Workspace;
 use App\Services\WorkspaceService;

@@ -26,8 +26,6 @@ class VerifyEmail extends Mailable
         $this->url = config('app.frontend_url')
             . '/verify-email?token='
             . $user->email_token;
-
-        // TODO: make the confirm on frontend
     }
 
     /**

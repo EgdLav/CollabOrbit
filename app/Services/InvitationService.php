@@ -2,21 +2,18 @@
 
 namespace App\Services;
 
+use App\Http\Responses\ApiResponse;
 use App\Models\Invitation;
+use App\Models\User;
 use App\Models\Workspace;
 
 class InvitationService
 {
-    public function create(Workspace $workspace, int $inviterId, int $inviteeId)
+    public function create(Workspace $workspace, int $invitee_id): Invitation
     {
-        // prevent inviting existing member
-        if ($workspace->users()->where('user_id', $inviteeId)->exists()) {
-            throw new \Exception('User already in workspace');
-        }
-
         return Invitation::create([
             'workspace_id' => $workspace->id,
-            'invitee_id' => $inviteeId,
+            'invitee_id' => $invitee_id,
         ]);
     }
 
@@ -26,18 +23,11 @@ class InvitationService
      * @return Invitation
      * @throws \Exception
      */
-    public function update(Invitation $invitation, string $status)
+    public function update(User $user, Workspace $workspace, Invitation $invitation, string $status): void
     {
-        if ($invitation->status !== 'pending') {
-            throw new \Exception('Invitation already handled');
+        if ($status == 'accepted') {
+            $workspace->users()->attach($user);
         }
-
-        $invitation->update(['status' => $status]);
-
-        if ($status === 'accepted') {
-            $invitation->workspace->users()->attach($invitation->invitee_id);
-        }
-
-        return $invitation;
+        $invitation->delete();
     }
 }

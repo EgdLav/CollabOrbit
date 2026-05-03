@@ -3,15 +3,17 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class InvitationStoreRequest extends FormRequest
+class InvitationStoreRequest extends ApiFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        $workspace = $this->route('workspace');
+        return $workspace && $this->user()->can('createInvitation', $workspace);
     }
 
     /**
@@ -21,8 +23,9 @@ class InvitationStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $workspace = $this->route('workspace');
         return [
-            'invitee_id' => ['required', 'exists:users,id'],
+            'invitee_id' => ['required', 'exists:users,id', ],
         ];
     }
 }

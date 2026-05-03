@@ -31,6 +31,18 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return $this->hasMany(Workspace::class, 'owner_id');
     }
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class, 'invitee_id');
+    }
+    public function tasks_executed(): HasMany
+    {
+        return $this->hasMany(Task::class, 'executor_id');
+    }
+    public function tasks_created(): HasMany
+    {
+        return $this->hasMany(Task::class, 'creator_id');
+    }
     protected $fillable = [
         'first_name',
         'last_name',

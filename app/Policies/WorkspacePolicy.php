@@ -61,11 +61,6 @@ class WorkspacePolicy
         return $workspace->owner_id == $user->id;
     }
 
-    public function updateInvitation(User $user, Invitation $invitation)
-    {
-        return $user->id === $invitation->invitee_id;
-    }
-
 
     public function create(User $user): bool
     {

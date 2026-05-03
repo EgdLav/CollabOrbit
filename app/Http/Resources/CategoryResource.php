@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Resources;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TaskResource extends JsonResource
+class CategoryResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,13 +17,8 @@ class TaskResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
-            'preview' => $this->preview_url,
-            'files' => $this->files_urls,
-            'due_date' => $this->due_date,
             'workspace_id' => $this->workspace_id,
-            'creator' => new UserResource($this->creator),
-            'executor' => new UserResource($this->executor),
+            'tasks' => TaskResource::collection($this->tasks),
         ];
     }
 }

@@ -4,9 +4,11 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use App\Models\Category;
+use App\Models\Invitation;
 use App\Models\Task;
 use App\Models\Workspace;
 use App\Policies\CategoryPolicy;
+use App\Policies\InvitationPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\WorkspacePolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -21,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Task::class => TaskPolicy::class,
         Workspace::class => WorkspacePolicy::class,
+        Invitation::class => InvitationPolicy::class,
     ];
 
     /**

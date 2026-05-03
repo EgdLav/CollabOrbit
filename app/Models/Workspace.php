@@ -27,6 +27,10 @@ class Workspace extends Model
     {
         return $this->hasMany(Category::class);
     }
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
 
     protected static function booted()
     {

@@ -2,13 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\Resources\UserResource;
+use App\Http\Requests\UserUpdateRequest;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\UserPrivateInfoResource;
+use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private UserService $userService
+    ) {}
+
+    public function update(UserUpdateRequest $request)
+    {
+        $updatedUser = $this->userService->update(
+            $request->user(),
+            $request->validated()
+        );
+        return ApiResponse::success('Your profile successfully updated', 200, [
+            'user' => new UserResource($updatedUser),
+        ]);
+    }
+
+    public function destroy(Request $request)
+    {
+        $this->userService->delete($request->user());
+
+        return ApiResponse::success();
+    }
     public function index(Request $request) {
         $query = User::query();
         if ($dep = $request->department) {
@@ -39,7 +64,7 @@ class UserController extends Controller
     }
     public function me(Request $request) {
         return ApiResponse::success(data:[
-            'user' => new UserResource($request->user()),
+            'user' => new UserPrivateInfoResource($request->user()),
         ]);
     }
 }

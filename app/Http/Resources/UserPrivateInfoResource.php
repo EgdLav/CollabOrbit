@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\Resources;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 
-class UserResource extends JsonResource
+class UserPrivateInfoResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -24,6 +24,12 @@ class UserResource extends JsonResource
             'bio' => $this->bio,
             'department' => $this->department,
             'profile_created' => Carbon::make($this->created_at)->format('d-m-Y'),
+            'statistics' => [
+                'workspaces' => $this->workspaces()->count(),
+                'tasks_executed' => $this->tasks_executed->count(),
+                'tasks_created' => $this->tasks_created->count(),
+                'chats' => $this->tasks_executed->count(),
+            ]
         ];
     }
 }

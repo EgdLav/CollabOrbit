@@ -24,7 +24,7 @@ class WorkspaceStoreRequest extends ApiFormRequest
         return [
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:255',
-            'slug' => 'required|string|max:50|unique:workspaces,slug|regex:/^[a-z0-9-]+$/',
+            'slug' => 'required|string|max:50|unique:workspaces,slug|regex:/^[a-z-]+$/',
         ];
     }
 }

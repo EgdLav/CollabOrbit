@@ -17,10 +17,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('preview')->default('default.png');
             $table->json('files')->nullable();
-            $table->foreignId('workspace_id')->constrained('workspaces');
-            $table->foreignId('category_id')->constrained('categories');
-            $table->foreignId('creator_id')->constrained('users');
-            $table->foreignId('executor_id')->constrained('users');
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained('categories')->cascadeOnDelete();
+            $table->foreignId('creator_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('executor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->date('due_date');
             $table->timestamps();
         });

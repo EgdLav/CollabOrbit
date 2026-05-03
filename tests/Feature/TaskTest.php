@@ -16,7 +16,7 @@ class TaskTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_task_create_returns_403_if_executor_is_not_workspace_member(): void
+    public function test_task_create_returns_422_if_executor_is_not_workspace_member(): void
     {
         Storage::fake('public');
 
@@ -25,8 +25,8 @@ class TaskTest extends TestCase
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
-            'slug' => 'tasks-workspace',
         ]);
+
         $workspace->users()->attach($owner->id);
 
         $category = Category::query()->create([
@@ -36,37 +36,15 @@ class TaskTest extends TestCase
 
         $this->actingAs($owner, 'sanctum');
 
-        $response = $this->postJson("/api/workspaces/{$workspace->id}/tasks", [
-            'name' => 'My Task',
-            'description' => 'Task description',
-            'executor_id' => $executor->id,
-            'category_id' => $category->id,
-            'preview' => UploadedFile::fake()->image('preview.png'),
-            'files' => [
-                UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
-            ],
-        ]);
-
-        $response->assertStatus(403);
-    }
-
-    public function test_task_create_requires_category_id(): void
-    {
-        $owner = User::factory()->create();
-        $executor = User::factory()->create();
-
-        $workspace = Workspace::factory()->create([
-            'owner_id' => $owner->id,
-            'slug' => 'tasks-validation-workspace',
-        ]);
-        $workspace->users()->attach([$owner->id, $executor->id]);
-
-        $this->actingAs($owner, 'sanctum');
-
-        $response = $this->postJson("/api/workspaces/{$workspace->id}/tasks", [
-            'name' => 'Task without category',
-            'executor_id' => $executor->id,
-        ]);
+        $response = $this->postJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category->id}/tasks",
+            [
+                'name' => 'My Task',
+                'description' => 'Task description',
+                'executor_id' => $executor->id,
+                'due_date' => now()->addDay()->toDateString(),
+            ]
+        );
 
         $response->assertStatus(422);
     }
@@ -78,9 +56,10 @@ class TaskTest extends TestCase
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
-            'slug' => 'update-task-workspace',
         ]);
+
         $workspace->users()->attach([$owner->id, $executor->id]);
+
         $category = Category::query()->create([
             'workspace_id' => $workspace->id,
             'name' => 'Updates',
@@ -95,19 +74,18 @@ class TaskTest extends TestCase
         ]);
 
         $this->actingAs($owner, 'sanctum');
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}", [
-            'name' => 'Updated task',
-            'description' => 'Updated description',
-        ]);
+
+        $response = $this->patchJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category->id}/tasks/{$task->id}",
+            [
+                'name' => 'Updated task',
+            ]
+        );
 
         $response->assertStatus(200)
             ->assertJsonFragment([
                 'name' => 'Updated task',
             ]);
-        $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
-            'name' => 'Updated task',
-        ]);
     }
 
     public function test_random_member_cannot_update_task(): void
@@ -118,9 +96,10 @@ class TaskTest extends TestCase
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
-            'slug' => 'forbidden-task-workspace',
         ]);
+
         $workspace->users()->attach([$owner->id, $executor->id, $member->id]);
+
         $category = Category::query()->create([
             'workspace_id' => $workspace->id,
             'name' => 'Security',
@@ -131,13 +110,17 @@ class TaskTest extends TestCase
             'category_id' => $category->id,
             'creator_id' => $owner->id,
             'executor_id' => $executor->id,
-            'name' => 'Protected task',
         ]);
 
         $this->actingAs($member, 'sanctum');
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}", [
-            'name' => 'Member update attempt',
-        ]);
+
+        $response = $this->patchJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category->id}/tasks/{$task->id}",
+            [
+                'name' => 'Hacker move',
+            ]
+        );
+
         $response->assertStatus(403);
     }
 

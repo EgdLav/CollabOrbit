@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('workspace_id')->constrained('workspaces');
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
             $table->timestamps();
         });
     }

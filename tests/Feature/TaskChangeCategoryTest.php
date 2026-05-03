@@ -21,16 +21,16 @@ class TaskChangeCategoryTest extends TestCase
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $creator->id,
-            'slug' => 'task-change-category',
         ]);
+
         $workspace->users()->attach([$creator->id, $executor->id]);
 
-        $category1 = Category::query()->create([
+        $category1 = Category::create([
             'workspace_id' => $workspace->id,
             'name' => 'Old',
         ]);
 
-        $category2 = Category::query()->create([
+        $category2 = Category::create([
             'workspace_id' => $workspace->id,
             'name' => 'New',
         ]);
@@ -44,9 +44,10 @@ class TaskChangeCategoryTest extends TestCase
 
         $this->actingAs($executor, 'sanctum');
 
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}/category", [
-            'category_id' => $category2->id,
-        ]);
+        $response = $this->patchJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category1->id}/tasks/{$task->id}/category",
+            ['category_id' => $category2->id]
+        );
 
         $response->assertStatus(200);
 
@@ -59,15 +60,15 @@ class TaskChangeCategoryTest extends TestCase
     public function test_random_user_cannot_change_category(): void
     {
         $owner = User::factory()->create();
-        $user = User::factory()->create();
+        $random = User::factory()->create();
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $owner->id,
-            'slug' => 'task-change-denied',
         ]);
+
         $workspace->users()->attach($owner->id);
 
-        $category = Category::query()->create([
+        $category = Category::create([
             'workspace_id' => $workspace->id,
             'name' => 'Main',
         ]);
@@ -79,11 +80,12 @@ class TaskChangeCategoryTest extends TestCase
             'executor_id' => $owner->id,
         ]);
 
-        $this->actingAs($user, 'sanctum');
+        $this->actingAs($random, 'sanctum');
 
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}/category", [
-            'category_id' => $category->id,
-        ]);
+        $response = $this->patchJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category->id}/tasks/{$task->id}/category",
+            ['category_id' => $category->id]
+        );
 
         $response->assertStatus(403);
     }
@@ -94,13 +96,13 @@ class TaskChangeCategoryTest extends TestCase
 
         $workspace = Workspace::factory()->create([
             'owner_id' => $user->id,
-            'slug' => 'task-change-validation',
         ]);
+
         $workspace->users()->attach($user->id);
 
-        $category = Category::query()->create([
+        $category = Category::create([
             'workspace_id' => $workspace->id,
-            'name' => 'Existing',
+            'name' => 'Valid',
         ]);
 
         $task = $this->insertTask([
@@ -110,20 +112,19 @@ class TaskChangeCategoryTest extends TestCase
             'executor_id' => $user->id,
         ]);
 
-        $otherWorkspace = Workspace::factory()->create([
-            'owner_id' => $user->id,
-            'slug' => 'other-workspace',
-        ]);
-        $otherCategory = Category::query()->create([
+        $otherWorkspace = Workspace::factory()->create();
+
+        $otherCategory = Category::create([
             'workspace_id' => $otherWorkspace->id,
             'name' => 'Other',
         ]);
 
         $this->actingAs($user, 'sanctum');
 
-        $response = $this->patchJson("/api/workspaces/{$workspace->id}/tasks/{$task->id}/category", [
-            'category_id' => $otherCategory->id,
-        ]);
+        $response = $this->patchJson(
+            "/api/workspaces/{$workspace->id}/categories/{$category->id}/tasks/{$task->id}/category",
+            ['category_id' => $otherCategory->id]
+        );
 
         $response->assertStatus(422);
     }
