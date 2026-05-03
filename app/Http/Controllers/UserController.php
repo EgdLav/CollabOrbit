@@ -64,7 +64,7 @@ class UserController extends Controller
     }
     public function me(Request $request) {
         return ApiResponse::success(data:[
-            'user' => new UserPrivateInfoResource($request->user()),
+            'user' => new UserResource($request->user()),
         ]);
     }
 }

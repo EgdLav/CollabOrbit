@@ -132,6 +132,6 @@ class InvitationTest extends TestCase
 
         $response = $this->actingAs($user)->getJson('/api/invitations');
         $response->assertStatus(200)
-            ->assertJsonCount(3, 'data.invites');
+            ->assertJsonCount(3, 'data.invitations');
     }
 }

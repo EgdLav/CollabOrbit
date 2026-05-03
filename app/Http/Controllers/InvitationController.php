@@ -21,7 +21,7 @@ class InvitationController extends Controller
     {
         $invites = $request->user()->invitations;
         return ApiResponse::success(data:[
-            'invites' => InvitationResource::collection($invites),
+            'invitations' => InvitationResource::collection($invites),
         ]);
     }
 

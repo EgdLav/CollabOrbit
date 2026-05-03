@@ -6,6 +6,7 @@ use App\Http\Requests\WorkspaceStoreRequest;
 use App\Http\Requests\WorkspaceUpdateRequest;
 use App\Http\Resources\WorkspaceResource;
 use App\Http\Responses\ApiResponse;
+use App\Models\Chat;
 use App\Models\Workspace;
 use App\Services\WorkspaceService;
 use Illuminate\Http\Request;
@@ -14,7 +15,10 @@ use Illuminate\Support\Facades\Gate;
 class WorkspaceController extends Controller
 {
 
-    public function __construct(private WorkspaceService $workspaceService) {}
+    public function __construct(private WorkspaceService $workspaceService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -26,6 +30,14 @@ class WorkspaceController extends Controller
         }
         $workspaces = $workspaces->get();
         return ApiResponse::success(data: WorkspaceResource::collection($workspaces));
+    }
+
+    public function owner(Request $request)
+    {
+        $workspaces = auth()->user()->ownWorkspaces;
+        return ApiResponse::success(data: [
+            'workspaces' => WorkspaceResource::collection($workspaces)
+        ]);
     }
 
     /**
@@ -45,6 +57,11 @@ class WorkspaceController extends Controller
             $request->validated(),
             auth()->user(),
         );
+        $chat = Chat::create([
+            'type' => 'workspace',
+            'workspace_id' => $workspace->id,
+        ]);
+        $chat->users()->attach($workspace->users->pluck('id'));
         return ApiResponse::success('Workspace successfully created', 201, [
             'workspace' => new WorkspaceResource($workspace),
         ]);
