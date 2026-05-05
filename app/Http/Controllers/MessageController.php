@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MessageStoreRequest;
 use App\Http\Resources\MessageResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Chat;
@@ -14,9 +15,17 @@ class MessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Chat $chat)
     {
-        //
+        $this->authorize('view', $chat);
+        $messages = $chat->messages()
+            ->with('user')
+            ->latest()
+            ->paginate(20);
+
+        return ApiResponse::success(data: [
+            'messages' => MessageResource::collection($messages),
+        ]);
     }
 
     /**
@@ -30,15 +39,16 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, User $user)
+    public function store(MessageStoreRequest $request, Chat $chat)
     {
-        $chat = $this->getOrCreatePrivateChat($user);
         $message = $chat->messages()->create([
             'user_id' => auth()->id(),
-            'body' => $request->body,
+            'body' => trim($request->body),
         ]);
 
-        return ApiResponse::success(code: 201, data:[
+        $message->load('user');
+
+        return ApiResponse::success(code: 201, data: [
             'message' => new MessageResource($message),
         ]);
     }
@@ -74,26 +84,5 @@ class MessageController extends Controller
     {
         //
     }
-    public function getOrCreatePrivateChat($userId): Chat
-    {
-        $authId = auth()->id();
 
-        $chat = Chat::where('type', 'private')
-            ->whereHas('users', fn($q) => $q->where('users.id', $authId))
-            ->whereHas('users', fn($q) => $q->where('users.id', $userId))
-            ->first();
-
-        if ($chat) {
-            return $chat;
-        }
-
-        // create new
-        $chat = Chat::create([
-            'type' => 'private',
-        ]);
-
-        $chat->users()->attach([$authId, $userId]);
-
-        return $chat;
-    }
 }

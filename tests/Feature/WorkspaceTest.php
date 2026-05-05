@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Chat;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -114,5 +115,30 @@ class WorkspaceTest extends TestCase
         $this->assertDatabaseMissing('workspaces', [
             'id' => $workspace->id,
         ]);
+    }
+    public function test_workspace_creates_chat()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->postJson('/api/workspaces', [
+                'name' => 'Test Workspace',
+                'slug' => 'test'
+            ]);
+
+        $response->assertStatus(201);
+
+        $workspace = Workspace::first();
+
+        $this->assertDatabaseHas('chats', [
+            'type' => 'workspace',
+            'workspace_id' => $workspace->id,
+        ]);
+
+        $chat = Chat::where('workspace_id', $workspace->id)->first();
+
+        $this->assertTrue(
+            $chat->users->contains($user->id)
+        );
     }
 }

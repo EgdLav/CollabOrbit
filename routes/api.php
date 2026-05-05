@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WorkspaceController;
@@ -30,6 +31,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::patch('/workspaces/{workspace}', [WorkspaceController::class, 'update']);
     Route::get('/workspaces/{workspace}', [WorkspaceController::class, 'show']);
     Route::delete('/workspaces/{workspace}', [WorkspaceController::class, 'destroy']);
+
 //   workspace categories operations
     Route::post('/workspaces/{workspace}/categories', [CategoryController::class, 'store']);
     Route::patch('/workspaces/{workspace}/categories/{category}', [CategoryController::class, 'update'])->scopeBindings();
@@ -47,6 +49,11 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::patch('/workspaces/{workspace}/categories/{category}/tasks/{task}/category', [TaskController::class, 'changeCategory'])->scopeBindings();
 
     // chat and messages
-    Route::post('/chats/{chat}/messages', [ChatController::class, 'store']);
-    Route::get('/chats/{chat}/messages', [ChatController::class, 'index']);
+    Route::get('/chats', [ChatController::class, 'index']);
+    Route::get('/chats/{chat}', [ChatController::class, 'show']);
+    Route::get('/workspaces/{workspace}/chat', [ChatController::class, 'byWorkspace']);
+    Route::post('/chats/private/{user}', [ChatController::class, 'store']);
+
+    Route::get('/chats/{chat}/messages', [MessageController::class, 'index']);
+    Route::post('/chats/{chat}/messages', [MessageController::class, 'store']);
 });
