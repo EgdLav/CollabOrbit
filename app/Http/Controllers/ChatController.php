@@ -17,14 +17,53 @@ class ChatController extends Controller
      */
     public function index(Request $request)
     {
-        $chats = $request->user()->chats()->latest()->get();
-        $chats->load([
-            'users',
-            'lastMessage',
-        ]);
+        $query = $request->user()
+            ->chats()
+            ->with([
+                'users',
+                'lastMessage',
+                'lastMessage.user',
+                'workspace',
+            ])
+            ->withMax('messages', 'created_at')
+            ->orderByDesc('messages_max_created_at');
+
+        if ($search = $request->query('search')) {
+
+            $query->where(function ($q) use ($search) {
+
+                // private chats → search users
+                $q->whereHas('users', function ($userQuery) use ($search) {
+
+                    $userQuery
+                        ->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%");
+
+                })
+
+                    // workspace chats → search workspace name
+                    ->orWhereHas('workspace', function ($workspaceQuery) use ($search) {
+
+                        $workspaceQuery
+                            ->where('name', 'like', "%{$search}%");
+
+                    });
+            });
+        }
+        if ($type = $request->query('type')) {
+            $query->where('type', $type);
+        }
+
+        $chats = $query->paginate($request->query('limit', 10));
 
         return ApiResponse::success(data: [
             'chats' => ChatResource::collection($chats),
+            'pagination' => [
+                'total' => $chats->total(),
+                'per_page' => $chats->perPage(),
+                'current_page' => $chats->currentPage(),
+                'last_page' => $chats->lastPage(),
+            ],
         ]);
     }
     public function byWorkspace(Request $request, Workspace $workspace)
@@ -34,7 +73,7 @@ class ChatController extends Controller
         $chat->load([
             'users',
             'lastMessage',
-        ]);
+        ])->loadCount('messages');
 
         return ApiResponse::success(data: [
             'chat' => new ChatResource($chat),
@@ -89,7 +128,7 @@ class ChatController extends Controller
         $chat->load([
             'users',
             'lastMessage',
-        ]);
+        ])->loadCount('messages');
 
         return ApiResponse::success(data: [
             'chat' => new ChatResource($chat),

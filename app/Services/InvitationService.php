@@ -27,6 +27,7 @@ class InvitationService
     {
         if ($status == 'accepted') {
             $workspace->users()->attach($user);
+            $workspace->chat->users()->attach($user);
         }
         $invitation->delete();
     }

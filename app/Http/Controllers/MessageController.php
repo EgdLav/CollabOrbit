@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSent;
 use App\Http\Requests\MessageStoreRequest;
 use App\Http\Resources\MessageResource;
 use App\Http\Responses\ApiResponse;
@@ -15,16 +16,24 @@ class MessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Chat $chat)
+    public function index(Request $request, Chat $chat)
     {
         $this->authorize('view', $chat);
-        $messages = $chat->messages()
+        $query = $chat->messages()
             ->with('user')
-            ->latest()
-            ->paginate(20);
+            ->orderByDesc('id');
 
-        return ApiResponse::success(data: [
+        if ($beforeId = $request->query('before_id')) {
+            $query->where('id', '<', $beforeId);
+        }
+
+        $messages = $query
+            ->limit($request->query('limit', 30))
+            ->get();
+
+        return ApiResponse::success(data:[
             'messages' => MessageResource::collection($messages),
+            'has_more' => $messages->count() == $request->query('limit', 30),
         ]);
     }
 
@@ -47,6 +56,7 @@ class MessageController extends Controller
         ]);
 
         $message->load('user');
+        broadcast(new MessageSent($message))->toOthers();
 
         return ApiResponse::success(code: 201, data: [
             'message' => new MessageResource($message),

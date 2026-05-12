@@ -20,7 +20,6 @@ class MessageResource extends JsonResource
             'created_at' => $this->created_at,
             'time' => $this->created_at->format('H:i'),
             'date' => $this->created_at->format('Y-m-d'),
-            'is_mine' => $this->user_id === auth()->id(),
             'user' => new UserResource(
                 $this->whenLoaded('user')
             ),
