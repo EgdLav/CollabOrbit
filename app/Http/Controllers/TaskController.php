@@ -76,7 +76,7 @@ class TaskController extends Controller
     }
     public function changeCategory(TaskChangeCategoryRequest $request, Workspace $workspace, Category $category, Task $task)
     {
-        $task = $this->taskService->changeCategory($task, $workspace, $request->validated());
+        $task = $this->taskService->changeCategory($task, $request->validated());
         return ApiResponse::success('Task moved', 200, [
             'task' => new TaskResource($task),
         ]);

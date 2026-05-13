@@ -59,7 +59,7 @@ class TaskService
         $task->update($filteredData);
         return $task->fresh();
     }
-    public function changeCategory(Task $task, Workspace $workspace, array $data): ?Task {
+    public function changeCategory(Task $task, array $data): ?Task {
         $task->update($data);
         return $task->fresh();
     }

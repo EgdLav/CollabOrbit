@@ -43,6 +43,7 @@ Route::middleware(['auth:sanctum', ])->group(function () {
     Route::get('/invitations', [InvitationController::class, 'index']);
 
     //task operations
+    Route::post('/workspaces/{workspace}/categories/{category}/tasks/{task}', [TaskController::class, 'show']);
     Route::post('/workspaces/{workspace}/categories/{category}/tasks', [TaskController::class, 'store']);
     Route::patch('/workspaces/{workspace}/categories/{category}/tasks/{task}', [TaskController::class, 'update'])->scopeBindings();
     Route::delete('/workspaces/{workspace}/categories/{category}/tasks/{task}', [TaskController::class, 'destroy'])->scopeBindings();

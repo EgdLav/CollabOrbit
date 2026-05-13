@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserPrivateInfoResource;
+use App\Http\Resources\UserPrivateResource;
 use App\Http\Resources\UserResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
@@ -24,7 +25,12 @@ class UserController extends Controller
             $request->validated()
         );
         return ApiResponse::success('Your profile successfully updated', 200, [
-            'user' => new UserResource($updatedUser),
+            'user' => new UserResource($updatedUser->withCount([
+                'tasks_created',
+                'tasks_executed',
+                'workspaces',
+                'chats',
+            ])),
         ]);
     }
 
@@ -45,7 +51,12 @@ class UserController extends Controller
                     ->orWhere('users.last_name', 'like', "%$name%");
             });
         }
-        $users = $query->paginate(10);
+        $users = $query->withCount([
+            'tasks_created',
+            'tasks_executed',
+            'workspaces',
+            'chats',
+        ])->paginate(10);
 
         return ApiResponse::success(data:[
             'users' => UserResource::collection($users->items()),
@@ -59,12 +70,12 @@ class UserController extends Controller
     }
     public function show(Request $request, User $user) {
         return ApiResponse::success(data:[
-            'user' => new UserResource($user),
+            'user' => new UserResource($request->user()->loadCount(['tasks_created', 'tasks_executed', 'workspaces', 'chats'])),
         ]);
     }
     public function me(Request $request) {
         return ApiResponse::success(data:[
-            'user' => new UserResource($request->user()),
+            'user' => new UserPrivateResource($request->user()->loadCount(['tasks_created', 'tasks_executed', 'workspaces', 'chats'])),
         ]);
     }
 }
