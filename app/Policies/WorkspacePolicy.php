@@ -39,6 +39,10 @@ class WorkspacePolicy
     {
         return $user->id == $task->creator_id || $user->id == $workspace->owner_id;
     }
+    public function deleteTask(User $user, Workspace $workspace, Task $task): bool
+    {
+        return $user->id == $task->creator_id || $user->id == $workspace->owner_id;
+    }
     public function changeCategory(User $user, Workspace $workspace, Task $task): bool
     {
         return $user->id == $workspace->owner_id || $user->id == $task->executor_id || $user->id == $task->creator_id;

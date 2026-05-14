@@ -43,7 +43,7 @@ class TaskService
         $paths = [];
 
         if ($request->hasFile('files')) {
-            foreach ($task->files as $file) {
+            foreach (($task->files ?? []) as $file) {
                 Storage::disk('public')->delete($file);
             }
             foreach ($request->file('files') as $file) {
@@ -52,8 +52,14 @@ class TaskService
             $data['files'] = $paths;
         }
         if ($request->hasFile('preview')) {
-            Storage::disk('public')->delete($task->preview);
-            $data['preview'] = $request->file('preview')->store('previews', 'public');
+
+            if ($task->preview) {
+                Storage::disk('public')->delete($task->preview);
+            }
+
+            $data['preview'] = $request
+                ->file('preview')
+                ->store('previews', 'public');
         }
         $filteredData = array_filter($data, fn($v) => $v !== null);
         $task->update($filteredData);

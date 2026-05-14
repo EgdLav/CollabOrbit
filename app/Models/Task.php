@@ -52,6 +52,9 @@ class Task extends Model
     }
     public function getPreviewUrlAttribute()
     {
+        if (!$this->preview) {
+            return null;
+        }
         return url(Storage::url($this->preview));
     }
 

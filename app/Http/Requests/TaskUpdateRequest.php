@@ -29,6 +29,7 @@ class TaskUpdateRequest extends ApiFormRequest
             'name' => 'nullable|string|max:255',
             'description' => 'nullable|string|max:255',
             'preview' => 'nullable|image|max:10240',
+            'due_date' => 'required|date|after_or_equal:today',
             'files' => 'nullable|array|max:1000',
             'files.*' => 'file|max:10240',
             'executor_id' => 'nullable|integer|exists:users,id',

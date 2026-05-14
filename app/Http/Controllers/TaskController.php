@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskChangeCategoryRequest;
-use App\Http\Requests\TaskChangeStatusRequest;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
+use App\Http\Resources\TaskDetailedResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Models\Task;
 use App\Models\Workspace;
 use App\Services\TaskService;
+use Illuminate\Support\Facades\Request;
 
 class TaskController extends Controller
 {
@@ -50,9 +51,11 @@ class TaskController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Task $task)
+    public function show(Workspace $workspace, Category $category, Task $task)
     {
-        //
+        return ApiResponse::success(data:[
+            'task' => new TaskDetailedResource($task),
+        ]);
     }
 
     /**
@@ -86,8 +89,10 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Request $request, Workspace $workspace, Category $category, Task $task)
     {
-
+        $this->authorize('deleteTask', [$workspace, $task]);
+        $task->delete();
+        return ApiResponse::success();
     }
 }
